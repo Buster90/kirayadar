@@ -44,6 +44,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const Text('Assalam-o-Alaikum,', style: TextStyle(fontSize: 15, color: AppColors.textMuted)),
             const Text('Muhammad Asif Khan', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
             const Row(children: [Icon(Icons.location_on, size: 14, color: AppColors.textMuted), SizedBox(width: 4), Text('Karachi, Pakistan', style: TextStyle(color: AppColors.textMuted))]),
+            const SizedBox(height: 10),
+            const SyncIndicator(),
             const SizedBox(height: 16),
             Container(width: double.infinity, padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(20)),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

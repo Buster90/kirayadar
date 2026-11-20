@@ -9,6 +9,17 @@ extension UnitStatusX on UnitStatus {
       };
 }
 
+/// Parses an `updatedAt` value stored as milliseconds-since-epoch (int),
+/// an ISO-8601 string, or null. Old seed / SharedPreferences data that has
+/// no `updatedAt` returns null, which merge logic treats as "oldest".
+DateTime? parseUpdatedAt(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return DateTime.fromMillisecondsSinceEpoch(v);
+  if (v is num) return DateTime.fromMillisecondsSinceEpoch(v.toInt());
+  if (v is String) return DateTime.tryParse(v);
+  return null;
+}
+
 class RentalUnit {
   final String id;
   final String title;
@@ -27,6 +38,7 @@ class RentalUnit {
   final String leaseEnd;
   final String tenantSince;
   final String beds;
+  DateTime? updatedAt;
 
   RentalUnit({
     required this.id,
@@ -46,6 +58,7 @@ class RentalUnit {
     this.leaseEnd = '',
     this.tenantSince = '',
     this.beds = '',
+    this.updatedAt,
   });
 
   Map<String, dynamic> toJson() => {
@@ -54,6 +67,7 @@ class RentalUnit {
         'rent': rent, 'status': status.name, 'dueDay': dueDay, 'receivedNote': receivedNote,
         'monthsLeft': monthsLeft, 'security': security, 'leaseStart': leaseStart,
         'leaseEnd': leaseEnd, 'tenantSince': tenantSince, 'beds': beds,
+        if (updatedAt != null) 'updatedAt': updatedAt!.millisecondsSinceEpoch,
       };
 
   factory RentalUnit.fromJson(Map<String, dynamic> j) => RentalUnit(
@@ -67,6 +81,7 @@ class RentalUnit {
         security: (j['security'] as num?)?.toInt() ?? 0, leaseStart: j['leaseStart'] as String? ?? '',
         leaseEnd: j['leaseEnd'] as String? ?? '', tenantSince: j['tenantSince'] as String? ?? '',
         beds: j['beds'] as String? ?? '',
+        updatedAt: parseUpdatedAt(j['updatedAt']),
       );
 }
 
@@ -79,12 +94,14 @@ class LedgerEntry {
   final String method;
   final String date;
   final String receipt;
-  LedgerEntry({required this.id, required this.unitId, required this.month, required this.amount, required this.status, required this.method, required this.date, this.receipt = ''});
-  Map<String, dynamic> toJson() => {'id': id, 'unitId': unitId, 'month': month, 'amount': amount, 'status': status, 'method': method, 'date': date, 'receipt': receipt};
+  DateTime? updatedAt;
+  LedgerEntry({required this.id, required this.unitId, required this.month, required this.amount, required this.status, required this.method, required this.date, this.receipt = '', this.updatedAt});
+  Map<String, dynamic> toJson() => {'id': id, 'unitId': unitId, 'month': month, 'amount': amount, 'status': status, 'method': method, 'date': date, 'receipt': receipt, if (updatedAt != null) 'updatedAt': updatedAt!.millisecondsSinceEpoch};
   factory LedgerEntry.fromJson(Map<String, dynamic> j) => LedgerEntry(
         id: j['id'] as String, unitId: j['unitId'] as String, month: j['month'] as String,
         amount: (j['amount'] as num).toInt(), status: j['status'] as String,
-        method: j['method'] as String, date: j['date'] as String, receipt: j['receipt'] as String? ?? '');
+        method: j['method'] as String, date: j['date'] as String, receipt: j['receipt'] as String? ?? '',
+        updatedAt: parseUpdatedAt(j['updatedAt']));
 }
 
 class Expense {
@@ -97,10 +114,12 @@ class Expense {
   final String method;
   final String paidTo;
   final String notes;
-  Expense({required this.id, required this.propertyTitle, required this.category, required this.title, required this.amount, required this.date, required this.method, this.paidTo = '', this.notes = ''});
-  Map<String, dynamic> toJson() => {'id': id, 'propertyTitle': propertyTitle, 'category': category, 'title': title, 'amount': amount, 'date': date, 'method': method, 'paidTo': paidTo, 'notes': notes};
+  DateTime? updatedAt;
+  Expense({required this.id, required this.propertyTitle, required this.category, required this.title, required this.amount, required this.date, required this.method, this.paidTo = '', this.notes = '', this.updatedAt});
+  Map<String, dynamic> toJson() => {'id': id, 'propertyTitle': propertyTitle, 'category': category, 'title': title, 'amount': amount, 'date': date, 'method': method, 'paidTo': paidTo, 'notes': notes, if (updatedAt != null) 'updatedAt': updatedAt!.millisecondsSinceEpoch};
   factory Expense.fromJson(Map<String, dynamic> j) => Expense(
         id: j['id'] as String, propertyTitle: j['propertyTitle'] as String, category: j['category'] as String,
         title: j['title'] as String, amount: (j['amount'] as num).toInt(), date: j['date'] as String,
-        method: j['method'] as String, paidTo: j['paidTo'] as String? ?? '', notes: j['notes'] as String? ?? '');
+        method: j['method'] as String, paidTo: j['paidTo'] as String? ?? '', notes: j['notes'] as String? ?? '',
+        updatedAt: parseUpdatedAt(j['updatedAt']));
 }

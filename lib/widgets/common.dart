@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/store.dart';
 import '../theme.dart';
 import '../models.dart';
 
@@ -87,4 +89,45 @@ class MintButton extends StatelessWidget {
 
 void showSnack(BuildContext context, String msg) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+}
+
+/// Small sync indicator: "Saved locally" when Firebase is not configured,
+/// "Saved to Firebase • last synced HH:MM" when the last sync succeeded.
+/// Tapping it forces a manual sync. Uses the existing theme colours.
+class SyncIndicator extends StatelessWidget {
+  const SyncIndicator({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final store = context.watch<AppStore>();
+    final synced = store.syncStatus == SyncStatus.synced;
+    final syncing = store.syncStatus == SyncStatus.syncing;
+    return GestureDetector(
+      onTap: () async {
+        await store.syncNow();
+        if (context.mounted) {
+          showSnack(context, store.syncStatus == SyncStatus.synced ? 'Synced with Firebase' : 'Saved locally — Firebase not configured');
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: synced ? AppColors.mint : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.border2),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(
+            synced ? Icons.cloud_done : syncing ? Icons.cloud_sync : Icons.cloud_off,
+            size: 14,
+            color: synced ? AppColors.primary : AppColors.textMuted,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            store.syncLabel,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted),
+          ),
+        ]),
+      ),
+    );
+  }
 }
