@@ -46,6 +46,10 @@ Ledger for Flat B-2 and 3 seed expenses are included. Data persists in SharedPre
 
 ## Firebase / Google Cloud Console — Firestore sync
 
+> Connected project: **kirayadar** (Android app `com.kirayadar.app`).
+> `android/app/google-services.json` and `lib/firebase_options.dart` are
+> configured on the dev machine only and are gitignored — never commit them.
+
 ### (a) Works fully offline / without Firebase
 
 The app is **offline-first**. All data (properties, ledger, expenses,

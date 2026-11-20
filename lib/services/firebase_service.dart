@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../firebase_options.dart';
+
 /// Safe Firebase init: works without google-services.json / GoogleService-Info.plist.
 /// Returns true only if Firebase actually initialised; otherwise the app
 /// continues with local SharedPreferences storage only.
@@ -19,7 +21,16 @@ class FirebaseService {
       if (Firebase.apps.isNotEmpty) {
         initialized = true;
       } else {
-        await Firebase.initializeApp();
+        try {
+          // Real project config (lib/firebase_options.dart) when available.
+          await Firebase.initializeApp(
+            options: DefaultFirebaseOptions.currentPlatform,
+          );
+        } on UnsupportedError {
+          // Platform has no registered app yet (web/iOS): try the native
+          // config files (google-services.json / GoogleService-Info.plist).
+          await Firebase.initializeApp();
+        }
         initialized = true;
       }
       // Enable offline persistence. Must be set before Firestore is used;
